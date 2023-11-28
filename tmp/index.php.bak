@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="myChart"></canvas>
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+
+        <?php
+        $file = 'DataCollector01.csv';
+        $xAxis = [];
+        $yAxis128 = [];
+
+        if (($handle = fopen($file, 'r')) !== false) {
+            $header = fgetcsv($handle); // 读取CSV文件的标题行
+            while (($row = fgetcsv($handle)) !== false) {
+                $xAxis[] = $row[0]; // 第一列数据作为X轴
+                $yAxis128[] = $row[125]; // 选择第128列的数据
+            }
+            fclose($handle);
+        }
+        ?>
+
+        var chartData = {
+            labels: <?php echo json_encode($xAxis); ?>,
+            datasets: [
+                {
+                    label: '<?php echo $header[125]; ?>', // 使用第128列的标题作为标签
+                    data: <?php echo json_encode($yAxis128); ?>,
+                    fill: false,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2, // 增加线宽度
+                    pointRadius: 0 // 不显示数据点
+                }
+            ]
+        };
+
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: 150,
+                        callback: function (value, index, values) {
+                            return value + "%";
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
